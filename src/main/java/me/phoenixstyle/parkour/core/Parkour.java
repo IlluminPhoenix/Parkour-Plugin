@@ -1,15 +1,20 @@
 package me.phoenixstyle.parkour.core;
+import me.phoenixstyle.parkour.utility.Hologram;
 import me.phoenixstyle.parkour.utility.tick_time;
 
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
+import org.bukkit.event.world.EntitiesLoadEvent;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -23,7 +28,7 @@ import java.util.*;
 public final class Parkour extends JavaPlugin implements Listener {
     private HashMap<Player, Integer> pk_times;
     private HashMap<Player, Double> pressure_plate_check;
-    private HashMap<Location, ParkourBlockType> parkour_blocks;
+    private HashMap<Location, ParkourBlock> parkour_blocks;
 
 
     private BukkitScheduler scheduler;
@@ -44,6 +49,7 @@ public final class Parkour extends JavaPlugin implements Listener {
         pk_times = new HashMap<>();
         pressure_plate_check = new HashMap<>();
         parkour_blocks = new HashMap<>();
+        Hologram.instantiate();
 
         scheduler.runTaskTimer(instance, () -> {
 
@@ -61,12 +67,14 @@ public final class Parkour extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
-
+        parkour_blocks.forEach((x, y) -> {
+            y.remove();
+        });
     }
 
     @EventHandler
     public void playerFly(PlayerToggleFlightEvent event) {
-        parkourStop(event.getPlayer());
+        parkourStop(event.getPlayer(), "Do not fly");
     }
 
     @EventHandler
@@ -95,10 +103,28 @@ public final class Parkour extends JavaPlugin implements Listener {
 
         if(block.getType() == Material.LIGHT_WEIGHTED_PRESSURE_PLATE &&
             type != ParkourBlockType.NONE) {
-            parkour_blocks.put(block.getLocation(), type);
-            getServer().broadcastMessage("Type: " + type);
+            String name = "";
+            switch (type) {
+                case START:
+                    name = "§aParkour Start";
+                    break;
+
+                case END:
+                    name = "§aParkour End";
+                    break;
+            }
+
+            parkour_blocks.put(block.getLocation(), new ParkourBlock(block.getLocation(), name, type));
+            //getServer().broadcastMessage("Type: " + type);
         }
 
+    }
+
+    @EventHandler
+    public void breakBlock(BlockBreakEvent event) {
+        if(parkour_blocks.containsKey(event.getBlock().getLocation())) {
+            removeParkourBlock(parkour_blocks.get(event.getBlock().getLocation()));
+        }
     }
 
     //Checks the surrounding are for valid PK blocks
@@ -106,14 +132,20 @@ public final class Parkour extends JavaPlugin implements Listener {
         Block block = precise_loc.getBlock();
         Location loc = block.getLocation();
         if(parkour_blocks.containsKey(loc)) {
-            ParkourBlockType type = parkour_blocks.get(loc);
+            ParkourBlockType type = parkour_blocks.get(loc).type;
             if(type != ParkourBlockType.NONE && block.getType() == Material.LIGHT_WEIGHTED_PRESSURE_PLATE) {
                 return type;
             }
-            getServer().broadcastMessage("Removed: " + type);
-            parkour_blocks.remove(loc);
+            removeParkourBlock(parkour_blocks.get(loc));
+
         }
         return ParkourBlockType.NONE;
+    }
+
+    private void removeParkourBlock(ParkourBlock block) {
+        //getServer().broadcastMessage("Removed: " + block.type);
+        parkour_blocks.remove(block.location);
+        block.remove();
     }
 
     private void parkourIterateTimes() {
@@ -140,8 +172,6 @@ public final class Parkour extends JavaPlugin implements Listener {
             ParkourBlockType type = checkSingleLocation(point);
             if(type != ParkourBlockType.NONE) {
                 if(Math.abs(block.getX()) < 0.4375 && Math.abs(block.getZ()) < 0.4375 && point.getY() == pair.getValue()) {
-
-
                     if(type == ParkourBlockType.START) {
                         parkourStart(player);
                     }
@@ -166,18 +196,59 @@ public final class Parkour extends JavaPlugin implements Listener {
         pk_times.put(player, 0);
     }
 
-    private void parkourStop(Player player) {
+    private void parkourStop(Player player, String reason) {
         if(pk_times.containsKey(player)) {
-            getServer().broadcastMessage("§c§lFailed Parkour");
+            getServer().broadcastMessage("§c§lParkour challenge failed! " + reason + "!");
         }
         pk_times.remove(player);
     }
 
     private void parkourFinish(Player player) {
-        getServer().broadcastMessage("§b" + player.getDisplayName() + "§a completed the parkour in §e§l"
-                + new tick_time(pk_times.get(player)).to_string() + "!");
-        getServer().broadcastMessage("§aUnfortunately you did not break any of the records for this parkour!");
-        pk_times.remove(player);
+        if(pk_times.containsKey(player)) {
+            getServer().broadcastMessage("§b" + player.getDisplayName() + "§a completed the parkour in §e§l"
+                    + new tick_time(pk_times.get(player)).to_string() + "!");
+            getServer().broadcastMessage("§aUnfortunately you did not break any of the records for this parkour!");
+            pk_times.remove(player);
+        }
+        else {
+            player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0F, 0.5F);
+            getServer().broadcastMessage("§cYou need to go to the start first!");
+        }
+
+    }
+
+    class ParkourBlock {
+        public ParkourBlockType type;
+        public Hologram hologram;
+        public Location location;
+
+        public ParkourBlock(Location location, String name, ParkourBlockType type) {
+            switch (type) {
+                case START:
+                    getServer().broadcastMessage("§aAdded start to the parkour challenge!");
+                    break;
+
+                case END:
+                    getServer().broadcastMessage("§aAdded end to the parkour challenge!");
+                    break;
+            }
+            this.location = location;
+            this.hologram = new Hologram(location.add(0.5, 0.5, 0.5), name);
+            this.type = type;
+        }
+
+        public void remove() {
+            switch (type) {
+                case START:
+                    getServer().broadcastMessage("§aRemoved start from the parkour challenge!");
+                    break;
+
+                case END:
+                    getServer().broadcastMessage("§aRemoved end to from parkour challenge!");
+                    break;
+            }
+            hologram.remove();
+        }
     }
 
     enum ParkourBlockType {
@@ -185,6 +256,16 @@ public final class Parkour extends JavaPlugin implements Listener {
         START,
         END,
         CHECKPOINT
+    }
+
+
+    public void sendDebugMessage(String s) {
+        getServer().broadcastMessage(s);
+    }
+
+    @EventHandler
+    public void entityLoad(EntitiesLoadEvent event) {
+        Hologram.loadEntities(event.getEntities());
     }
 }
 
