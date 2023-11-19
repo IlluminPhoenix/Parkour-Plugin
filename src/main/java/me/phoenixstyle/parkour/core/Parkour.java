@@ -114,7 +114,7 @@ public final class Parkour extends JavaPlugin implements Listener {
                     break;
             }
 
-            parkour_blocks.put(block.getLocation(), new ParkourBlock(block.getLocation(), name, type));
+            parkour_blocks.put(block.getLocation(), new ParkourBlock(block.getLocation(), name, type, event.getPlayer()));
             //getServer().broadcastMessage("Type: " + type);
         }
 
@@ -123,7 +123,7 @@ public final class Parkour extends JavaPlugin implements Listener {
     @EventHandler
     public void breakBlock(BlockBreakEvent event) {
         if(parkour_blocks.containsKey(event.getBlock().getLocation())) {
-            removeParkourBlock(parkour_blocks.get(event.getBlock().getLocation()));
+            removeParkourBlock(parkour_blocks.get(event.getBlock().getLocation()), event.getPlayer());
         }
     }
 
@@ -146,6 +146,12 @@ public final class Parkour extends JavaPlugin implements Listener {
         //getServer().broadcastMessage("Removed: " + block.type);
         parkour_blocks.remove(block.location);
         block.remove();
+    }
+
+    private void removeParkourBlock(ParkourBlock block, Player player) {
+        //getServer().broadcastMessage("Removed: " + block.type);
+        parkour_blocks.remove(block.location);
+        block.remove(player);
     }
 
     private void parkourIterateTimes() {
@@ -187,10 +193,10 @@ public final class Parkour extends JavaPlugin implements Listener {
 
     private void parkourStart(Player player) {
         if(pk_times.containsKey(player)) {
-            getServer().broadcastMessage("§aReset your timer to 00:00! Get to the finish line!");
+            player.sendMessage("§aReset your timer to 00:00! Get to the finish line!");
         }
         else {
-            getServer().broadcastMessage("§aParkour challenge started!");
+            player.sendMessage("§aParkour challenge started!");
         }
 
         pk_times.put(player, 0);
@@ -198,7 +204,7 @@ public final class Parkour extends JavaPlugin implements Listener {
 
     private void parkourStop(Player player, String reason) {
         if(pk_times.containsKey(player)) {
-            getServer().broadcastMessage("§c§lParkour challenge failed! " + reason + "!");
+            player.sendMessage("§c§lParkour challenge failed! " + reason + "!");
         }
         pk_times.remove(player);
     }
@@ -207,12 +213,12 @@ public final class Parkour extends JavaPlugin implements Listener {
         if(pk_times.containsKey(player)) {
             getServer().broadcastMessage("§b" + player.getDisplayName() + "§a completed the parkour in §e§l"
                     + new tick_time(pk_times.get(player)).to_string() + "!");
-            getServer().broadcastMessage("§aUnfortunately you did not break any of the records for this parkour!");
+            player.sendMessage("§aUnfortunately you did not break any of the records for this parkour!");
             pk_times.remove(player);
         }
         else {
             player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0F, 0.5F);
-            getServer().broadcastMessage("§cYou need to go to the start first!");
+            player.sendMessage("§cYou need to go to the start first!");
         }
 
     }
@@ -222,14 +228,14 @@ public final class Parkour extends JavaPlugin implements Listener {
         public Hologram hologram;
         public Location location;
 
-        public ParkourBlock(Location location, String name, ParkourBlockType type) {
+        public ParkourBlock(Location location, String name, ParkourBlockType type, Player player) {
             switch (type) {
                 case START:
-                    getServer().broadcastMessage("§aAdded start to the parkour challenge!");
+                    player.sendMessage("§aAdded start to the parkour challenge!");
                     break;
 
                 case END:
-                    getServer().broadcastMessage("§aAdded end to the parkour challenge!");
+                    player.sendMessage("§aAdded end to the parkour challenge!");
                     break;
             }
             this.location = location;
@@ -237,16 +243,20 @@ public final class Parkour extends JavaPlugin implements Listener {
             this.type = type;
         }
 
-        public void remove() {
+        public void remove(Player player) {
             switch (type) {
                 case START:
-                    getServer().broadcastMessage("§aRemoved start from the parkour challenge!");
+                    player.sendMessage("§aRemoved start from the parkour challenge!");
                     break;
 
                 case END:
-                    getServer().broadcastMessage("§aRemoved end to from parkour challenge!");
+                    player.sendMessage("§aRemoved end to from parkour challenge!");
                     break;
             }
+            hologram.remove();
+        }
+
+        public void remove() {
             hologram.remove();
         }
     }
