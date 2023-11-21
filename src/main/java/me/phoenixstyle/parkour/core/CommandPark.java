@@ -39,8 +39,6 @@ public class CommandPark implements CommandExecutor, TabCompleter {
                 ItemMeta start_meta = start.getItemMeta();
                 assert start_meta != null;
                 start_meta.setDisplayName("§aStart Block");
-                //start_meta.getPersistentDataContainer().set(new NamespacedKey(Parkour.getInstance(), "start"),
-                //        PersistentDataType.BOOLEAN, true);
                 start.setItemMeta(start_meta);
                 Utility.setDataKey(start, new NamespacedKey(Parkour.getInstance(), "start"), PersistentDataType.BOOLEAN, true);
 
@@ -49,16 +47,32 @@ public class CommandPark implements CommandExecutor, TabCompleter {
                 ItemMeta end_meta = end.getItemMeta();
                 assert end_meta != null;
                 end_meta.setDisplayName("§cEnd Block");
-                end_meta.getPersistentDataContainer().set(new NamespacedKey(Parkour.getInstance(), "end"),
-                        PersistentDataType.BOOLEAN, true);
                 end.setItemMeta(end_meta);
+                Utility.setDataKey(end, new NamespacedKey(Parkour.getInstance(), "end"), PersistentDataType.BOOLEAN, true);
 
 
                 player.getInventory().addItem(start, end);
                 player.sendMessage("§aGave you parkour blocks!");
             }
             else if(action == CommandAction.CHECKPOINT) {
+                ItemStack set = new ItemStack(Material.EMERALD);
+                //ItemStack checkpoint = new ItemStack(Material.EMERALD);
+                ItemStack restart = new ItemStack(Material.RED_DYE);
 
+                ItemMeta x = set.getItemMeta();
+                assert x != null;
+                x.setDisplayName("§aSet new checkpoint");
+                set.setItemMeta(x);
+
+                x = restart.getItemMeta();
+                assert x != null;
+                x.setDisplayName("§cReset");
+                restart.setItemMeta(x);
+
+                Utility.setDataKey(set, new NamespacedKey(Parkour.getInstance(), "setcp"), PersistentDataType.BOOLEAN, true);
+                Utility.setDataKey(restart, new NamespacedKey(Parkour.getInstance(), "restart"), PersistentDataType.BOOLEAN, true);
+
+                player.getInventory().addItem(restart, set);
                 player.sendMessage("§aGave you checkpoint items!");
             }
             else {

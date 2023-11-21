@@ -53,6 +53,7 @@ public final class Parkour extends JavaPlugin implements Listener {
         pressure_plate_check = new HashMap<>();
         parkour_blocks = new HashMap<>();
         Hologram.instantiate();
+        ParkourItems.initiate();
 
         scheduler.runTaskTimer(instance, () -> {
 
@@ -73,6 +74,12 @@ public final class Parkour extends JavaPlugin implements Listener {
         parkour_blocks.forEach((x, y) -> {
             y.remove();
         });
+    }
+
+    @EventHandler
+    public void interactEvent(PlayerInteractEvent event) {
+        ParkourItems.interactEvent(event);
+
     }
 
     @EventHandler
@@ -106,16 +113,6 @@ public final class Parkour extends JavaPlugin implements Listener {
             type = ParkourBlockType.END;
         }
 
-        /*
-        if(container.has(new NamespacedKey(instance, "start"), PersistentDataType.BOOLEAN)) {
-            type = ParkourBlockType.START;
-        }
-        else if(container.has(new NamespacedKey(instance, "end"), PersistentDataType.BOOLEAN)) {
-            type = ParkourBlockType.END;
-        }
-        */
-
-
         if(block.getType() == Material.LIGHT_WEIGHTED_PRESSURE_PLATE &&
             type != ParkourBlockType.NONE) {
             String name = "";
@@ -141,6 +138,12 @@ public final class Parkour extends JavaPlugin implements Listener {
             removeParkourBlock(parkour_blocks.get(event.getBlock().getLocation()), event.getPlayer());
         }
     }
+
+    @EventHandler
+    public void entityLoad(EntitiesLoadEvent event) {
+        Hologram.loadEntities(event.getEntities());
+    }
+
 
     //Checks the surrounding are for valid PK blocks
     private ParkourBlockType checkSingleLocation(Location precise_loc) {
@@ -217,6 +220,10 @@ public final class Parkour extends JavaPlugin implements Listener {
         pk_times.put(player, 0);
     }
 
+    public void failParkour(Player player, String reason) {
+        parkourStop(player, reason);
+    }
+
     private void parkourStop(Player player, String reason) {
         if(pk_times.containsKey(player)) {
             player.sendMessage("§c§lParkour challenge failed! " + reason + "!");
@@ -288,10 +295,7 @@ public final class Parkour extends JavaPlugin implements Listener {
         getServer().broadcastMessage(s);
     }
 
-    @EventHandler
-    public void entityLoad(EntitiesLoadEvent event) {
-        Hologram.loadEntities(event.getEntities());
-    }
+
 }
 
 
