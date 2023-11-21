@@ -48,32 +48,23 @@ public class Hologram {
 
     public static void loadEntities(List<Entity> entities) {
         for(Entity entity : entities) {
-            Parkour.getInstance().sendDebugMessage("Entity Loaded");
             if (entity.getType() != EntityType.ARMOR_STAND) {
-                Parkour.getInstance().sendDebugMessage("Not Armour Stand");
                 continue;
             }
-            Parkour.getInstance().sendDebugMessage("1");
             ArmorStand stand = (ArmorStand) entity;
             if (!stand.hasMetadata("hologram")){
-                Parkour.getInstance().sendDebugMessage("No Hologram");
                 continue;
             }
-            Parkour.getInstance().sendDebugMessage("2");
             if(!holos.containsKey(entity.getLocation())) {
-                Parkour.getInstance().sendDebugMessage("Holos doesn't contain Key");
                 entity.remove();
                 continue;
             }
-            Parkour.getInstance().sendDebugMessage("3");
             Hologram holo = holos.get(entity.getLocation());
             if(!(holo.armour_stand.getEntityId() == stand.getEntityId())) {
-                Parkour.getInstance().sendDebugMessage("Removed and replaced!");
                 holo.armour_stand.remove();
                 holo.armour_stand = stand;
                 continue;
             }
-            Parkour.getInstance().sendDebugMessage("All fine!");
         }
     }
 

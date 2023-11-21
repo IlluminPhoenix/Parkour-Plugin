@@ -27,13 +27,14 @@ public class CommandPark implements CommandExecutor, TabCompleter {
             full_command.append(arg);
         }
         if (sender instanceof Player) {
-            if(args.length < 1) {
-                sender.sendMessage("§cUnknown or incomplete command, see below for error");
-                sender.sendMessage("§7" + full_command +"§c§o<--[Here]");
-                return false;
-            }
             Player player = (Player) sender;
-            if(args[0].equals("blocks")) {
+            if(args.length < 1) {
+                sendErrorMessageResponse(player, full_command.toString());
+                return true;
+            }
+
+            CommandAction action = parseArgumentAction(0, args[0]);
+            if(action == CommandAction.BLOCK) {
                 ItemStack start = new ItemStack(Material.LIGHT_WEIGHTED_PRESSURE_PLATE);
                 ItemMeta start_meta = start.getItemMeta();
                 assert start_meta != null;
@@ -52,14 +53,14 @@ public class CommandPark implements CommandExecutor, TabCompleter {
                 player.getInventory().addItem(start, end);
                 player.sendMessage("§aGave you parkour blocks!");
             }
-            else if(args[0].equals("checkpoints")) {
-
+            else if(action == CommandAction.CHECKPOINT) {
                 player.sendMessage("§aGave you checkpoint items!");
+            }
+            else {
+                sendErrorMessageResponse(player, full_command.toString());
             }
 
         }
-
-
         // If the player (or console) uses our command correct, we can return true
         return true;
     }
@@ -69,7 +70,6 @@ public class CommandPark implements CommandExecutor, TabCompleter {
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         List<String> l = new ArrayList<String>();
         if(command.getName().equalsIgnoreCase("park")) {
-
             if (args.length == 1) {
                 l.add("blocks");
                 l.add("checkpoints");
@@ -78,5 +78,31 @@ public class CommandPark implements CommandExecutor, TabCompleter {
         }
 
         return l;
+    }
+
+    private CommandAction parseArgumentAction(Integer index, String arg) {
+        if(index == 0) {
+            switch (arg) {
+                case "blocks":
+                    return CommandAction.BLOCK;
+
+                case "checkpoints":
+                    return CommandAction.CHECKPOINT;
+            }
+
+        }
+        return CommandAction.UNPARSEABLE;
+    }
+
+    private void sendErrorMessageResponse(Player caller, String cmd) {
+        caller.sendMessage("§cUnknown or incomplete command, see below for error");
+        caller.sendMessage("§7" + cmd +"§c§o<--[HERE]");
+    }
+
+    enum CommandAction {
+        BLOCK,
+        CHECKPOINT,
+        UNPARSEABLE,
+        WRONG_PARSER
     }
 }
