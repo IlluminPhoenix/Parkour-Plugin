@@ -38,7 +38,7 @@ public class ParkourItems {
 
     private static void setNewCheckpoint(Player player) {
         saved_cps.put(player, player.getLocation());
-        player.sendMessage("§cNew checkpoint set!");
+        player.sendMessage("§eNew checkpoint set!");
     }
 
     private static void resetToCheckpoint(Player player) {
