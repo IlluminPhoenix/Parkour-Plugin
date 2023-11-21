@@ -1,5 +1,6 @@
 package me.phoenixstyle.parkour.core;
 
+import me.phoenixstyle.parkour.utility.Utility;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.command.Command;
@@ -12,7 +13,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class CommandPark implements CommandExecutor, TabCompleter {
@@ -39,21 +39,26 @@ public class CommandPark implements CommandExecutor, TabCompleter {
                 ItemMeta start_meta = start.getItemMeta();
                 assert start_meta != null;
                 start_meta.setDisplayName("§aStart Block");
-                start_meta.getPersistentDataContainer().set(new NamespacedKey(Parkour.getInstance(), "start"),
-                        PersistentDataType.BOOLEAN, true);
+                //start_meta.getPersistentDataContainer().set(new NamespacedKey(Parkour.getInstance(), "start"),
+                //        PersistentDataType.BOOLEAN, true);
                 start.setItemMeta(start_meta);
+                Utility.setDataKey(start, new NamespacedKey(Parkour.getInstance(), "start"), PersistentDataType.BOOLEAN, true);
+
 
                 ItemStack end = new ItemStack(Material.LIGHT_WEIGHTED_PRESSURE_PLATE);
                 ItemMeta end_meta = end.getItemMeta();
+                assert end_meta != null;
                 end_meta.setDisplayName("§cEnd Block");
                 end_meta.getPersistentDataContainer().set(new NamespacedKey(Parkour.getInstance(), "end"),
                         PersistentDataType.BOOLEAN, true);
                 end.setItemMeta(end_meta);
 
+
                 player.getInventory().addItem(start, end);
                 player.sendMessage("§aGave you parkour blocks!");
             }
             else if(action == CommandAction.CHECKPOINT) {
+
                 player.sendMessage("§aGave you checkpoint items!");
             }
             else {

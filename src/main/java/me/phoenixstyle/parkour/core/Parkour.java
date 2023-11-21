@@ -1,11 +1,10 @@
 package me.phoenixstyle.parkour.core;
 import me.phoenixstyle.parkour.utility.Hologram;
 import me.phoenixstyle.parkour.utility.tick_time;
+import me.phoenixstyle.parkour.utility.Utility;
 
 import org.bukkit.*;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -15,12 +14,15 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
 import org.bukkit.event.world.EntitiesLoadEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.util.Vector;
+
+
 
 import java.util.*;
 
@@ -90,17 +92,29 @@ public final class Parkour extends JavaPlugin implements Listener {
 
     @EventHandler
     public void placeBlock(BlockPlaceEvent event) {
-        ItemMeta meta = event.getPlayer().getInventory().getItemInMainHand().getItemMeta();
-        PersistentDataContainer container = meta.getPersistentDataContainer();
+        ItemStack stack = event.getPlayer().getInventory().getItemInMainHand();
+        //ItemMeta meta = stack.getItemMeta();
+        //assert meta != null;
+        //PersistentDataContainer container = meta.getPersistentDataContainer();
         Block block = event.getBlockPlaced();
 
         ParkourBlockType type = ParkourBlockType.NONE;
+        if(Utility.hasDataKey(stack, new NamespacedKey(instance, "start"), PersistentDataType.BOOLEAN)) {
+            type = ParkourBlockType.START;
+        }
+        else if(Utility.hasDataKey(stack, new NamespacedKey(instance, "end"), PersistentDataType.BOOLEAN)) {
+            type = ParkourBlockType.END;
+        }
+
+        /*
         if(container.has(new NamespacedKey(instance, "start"), PersistentDataType.BOOLEAN)) {
             type = ParkourBlockType.START;
         }
         else if(container.has(new NamespacedKey(instance, "end"), PersistentDataType.BOOLEAN)) {
             type = ParkourBlockType.END;
         }
+        */
+
 
         if(block.getType() == Material.LIGHT_WEIGHTED_PRESSURE_PLATE &&
             type != ParkourBlockType.NONE) {

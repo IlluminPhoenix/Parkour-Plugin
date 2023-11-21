@@ -1,18 +1,12 @@
 package me.phoenixstyle.parkour.utility;
 
 import me.phoenixstyle.parkour.core.Parkour;
-import org.bukkit.*;
 import org.bukkit.Location;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.world.EntitiesLoadEvent;
 import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.metadata.Metadatable;
-
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
