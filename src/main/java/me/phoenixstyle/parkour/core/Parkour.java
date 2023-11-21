@@ -41,6 +41,7 @@ public final class Parkour extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
         Objects.requireNonNull(this.getCommand("park")).setExecutor(new CommandPark());
+        Objects.requireNonNull(this.getCommand("park")).setTabCompleter(new CommandPark());
         Parkour.instance = this;
         getServer().broadcastMessage("Reload");
         getServer().getPluginManager().registerEvents(this, this);

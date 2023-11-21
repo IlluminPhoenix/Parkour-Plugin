@@ -80,13 +80,14 @@ public class Hologram {
     private void spawnArmourStand(Location loc) {
         //Parkour.getInstance().sendDebugMessage("Spawn " + loc.toVector().toString());
         armour_stand = (ArmorStand) Objects.requireNonNull(loc.getWorld()).spawnEntity(loc, EntityType.ARMOR_STAND);
-        armour_stand.setInvulnerable(true);
+        armour_stand.setInvisible(true);
+        armour_stand.setInvulnerable(true); //Fix this
         armour_stand.setSilent(true);
         armour_stand.setGravity(false);
         armour_stand.setCustomNameVisible(true);
         armour_stand.setCustomName(name);
         armour_stand.setSmall(true);
-        armour_stand.setInvisible(true);
         armour_stand.setMetadata("hologram", new FixedMetadataValue(Parkour.getInstance(), true));
+        armour_stand.teleport(loc);
     }
 }
