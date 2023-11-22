@@ -289,11 +289,11 @@ public final class Parkour extends JavaPlugin implements Listener {
         }
     }
 
-    enum ParkourBlockType {
+    public enum ParkourBlockType {
         NONE,
         START,
         END,
-        CHECKPOINT
+        CHECKPOINT,
     }
 
 

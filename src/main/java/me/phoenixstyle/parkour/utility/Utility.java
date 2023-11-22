@@ -1,10 +1,13 @@
 package me.phoenixstyle.parkour.utility;
 
+import me.phoenixstyle.parkour.core.Parkour;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.util.Vector;
+import org.joml.Vector3d;
 
 import java.util.Objects;
 
@@ -56,5 +59,37 @@ public class Utility {
         OVERRIDE_AND_CREATE,
         LEAVE, //LEAVE is such a just a joke, I'm leaving it though (Pun intended)
         LEAVE_AND_CREATE,
+    }
+
+    public static Parkour.ParkourBlockType parseParkourBlockType(String s) {
+        switch (s) {
+            case "start":
+                return Parkour.ParkourBlockType.START;
+
+            case "end":
+                return Parkour.ParkourBlockType.END;
+
+            case "checkpoint":
+                return Parkour.ParkourBlockType.CHECKPOINT;
+        }
+
+        return Parkour.ParkourBlockType.NONE;
+    }
+
+    public static Vector parseVector(String[] args) {
+        if(args.length != 3) {throw new RuntimeException();}
+
+        double[] ds = new double[3];
+
+        for(int i = 0; i < 3; i++) {
+            try {
+                ds[i] = Double.parseDouble(args[i]);
+            }
+            catch (Exception e) {
+                throw new RuntimeException();
+            }
+        }
+
+        return new Vector(ds[0], ds[1], ds[2]);
     }
 }

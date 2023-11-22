@@ -1,6 +1,8 @@
 package me.phoenixstyle.parkour.core;
 
+import me.phoenixstyle.parkour.core.plane.Plane;
 import me.phoenixstyle.parkour.utility.Utility;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.command.Command;
@@ -12,10 +14,9 @@ import org.bukkit.event.player.PlayerToggleFlightEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.util.Vector;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class CommandPark implements CommandExecutor, TabCompleter {
 
@@ -37,8 +38,8 @@ public class CommandPark implements CommandExecutor, TabCompleter {
                 return true;
             }
 
-            CommandAction action = parseArgumentAction(0, args[0]);
-            if(action == CommandAction.BLOCK) {
+            CommandActionI1 action = parseArgumentAction(0, args[0]);
+            if(action == CommandActionI1.BLOCK) {
                 ItemStack start = new ItemStack(Material.LIGHT_WEIGHTED_PRESSURE_PLATE);
                 ItemMeta start_meta = start.getItemMeta();
                 assert start_meta != null;
@@ -58,7 +59,7 @@ public class CommandPark implements CommandExecutor, TabCompleter {
                 player.getInventory().addItem(start, end);
                 player.sendMessage("§aGave you parkour blocks!");
             }
-            else if(action == CommandAction.CHECKPOINT) {
+            else if(action == CommandActionI1.CHECKPOINT) {
                 ItemStack set = new ItemStack(Material.EMERALD);
                 //ItemStack checkpoint = new ItemStack(Material.EMERALD);
                 ItemStack restart = new ItemStack(Material.RED_DYE);
@@ -79,7 +80,7 @@ public class CommandPark implements CommandExecutor, TabCompleter {
                 player.getInventory().addItem(restart, set);
                 player.sendMessage("§aGave you checkpoint items!");
             }
-            else if(action == CommandAction.FLY) {
+            else if(action == CommandActionI1.FLY) {
                 if(fly_perms.containsKey(player) && !fly_perms.get(player)) {
                     player.sendMessage("§aTurned on flight!");
                     fly_perms.remove(player);
@@ -91,6 +92,34 @@ public class CommandPark implements CommandExecutor, TabCompleter {
                     player.setAllowFlight(false);
 
                 }
+            }
+            else if (action == CommandActionI1.PLANE) {
+                if(args.length < 11) {
+                    sendErrorMessageResponse(player, full_command.toString());
+                    return true;
+                }
+
+                Parkour.ParkourBlockType type = Utility.parseParkourBlockType(args[1]);
+                if(type == Parkour.ParkourBlockType.NONE) {
+                    sendErrorMessageResponse(player, full_command.toString());
+                    return true;
+                }
+
+                Location[] vecs = new Location[3];
+
+                for(int i = 0; i < 3; i++) {
+                    String[] arr = {args[i * 3 + 2], args[i * 3 + 2], args[i * 3 + 2]};
+                    try{
+                        Vector vec = Utility.parseVector(arr);
+                        vecs[i] = new Location(player.getWorld(), vec.getX(), vec.getY(), vec.getZ());
+                    }
+                    catch (Exception e) {
+                        sendErrorMessageResponse(player, full_command.toString());
+                        return true;
+                    }
+                }
+
+                new Plane(type, vecs[0], vecs[1], vecs[2]);
             }
             else {
                 sendErrorMessageResponse(player, full_command.toString());
@@ -110,6 +139,13 @@ public class CommandPark implements CommandExecutor, TabCompleter {
                 l.add("blocks");
                 l.add("checkpoints");
                 l.add("fly");
+                l.add("plane");
+            }
+            else if(args.length == 2) {
+                if(args[0].equals("plane")) {
+                    l.add("start");
+                    l.add("end");
+                }
             }
 
         }
@@ -117,21 +153,25 @@ public class CommandPark implements CommandExecutor, TabCompleter {
         return l;
     }
 
-    private CommandAction parseArgumentAction(Integer index, String arg) {
+    private CommandActionI1 parseArgumentAction(Integer index, String arg) {
         if(index == 0) {
             switch (arg) {
                 case "blocks":
-                    return CommandAction.BLOCK;
+                    return CommandActionI1.BLOCK;
 
                 case "checkpoints":
-                    return CommandAction.CHECKPOINT;
+                    return CommandActionI1.CHECKPOINT;
 
                 case "fly":
-                    return CommandAction.FLY;
+                    return CommandActionI1.FLY;
+
+                case "plane":
+                    return CommandActionI1.PLANE;
+
             }
 
         }
-        return CommandAction.UNPARSEABLE;
+        return CommandActionI1.UNPARSEABLE;
     }
 
     private void sendErrorMessageResponse(Player caller, String cmd) {
@@ -145,10 +185,11 @@ public class CommandPark implements CommandExecutor, TabCompleter {
         }
     }
 
-    enum CommandAction {
+    enum CommandActionI1 {
         BLOCK,
         CHECKPOINT,
         FLY,
+        PLANE,
         UNPARSEABLE,
         WRONG_PARSER
     }
