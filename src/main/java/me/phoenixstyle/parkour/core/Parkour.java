@@ -35,6 +35,7 @@ public final class Parkour extends JavaPlugin implements Listener {
 
     private BukkitScheduler scheduler;
     private static Parkour instance;
+    private CommandPark commandPark;
     public static Parkour getInstance() {
         return Parkour.instance;
     }
@@ -42,8 +43,9 @@ public final class Parkour extends JavaPlugin implements Listener {
 
     @Override
     public void onEnable() {
-        Objects.requireNonNull(this.getCommand("park")).setExecutor(new CommandPark());
-        Objects.requireNonNull(this.getCommand("park")).setTabCompleter(new CommandPark());
+        commandPark = new CommandPark();
+        Objects.requireNonNull(this.getCommand("park")).setExecutor(commandPark);
+        Objects.requireNonNull(this.getCommand("park")).setTabCompleter(commandPark);
         Parkour.instance = this;
         getServer().broadcastMessage("Reload");
         getServer().getPluginManager().registerEvents(this, this);
@@ -84,7 +86,11 @@ public final class Parkour extends JavaPlugin implements Listener {
 
     @EventHandler
     public void playerFly(PlayerToggleFlightEvent event) {
-        parkourStop(event.getPlayer(), "Do not fly");
+        commandPark.playerFly(event);
+        if(!event.isCancelled()) {
+            parkourStop(event.getPlayer(), "Do not fly");
+        }
+
     }
 
     @EventHandler

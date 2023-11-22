@@ -8,14 +8,18 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerToggleFlightEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class CommandPark implements CommandExecutor, TabCompleter {
+
+    public HashMap<Player, Boolean> fly_perms;
 
     // This method is called, when somebody uses our command
     @Override
@@ -75,6 +79,19 @@ public class CommandPark implements CommandExecutor, TabCompleter {
                 player.getInventory().addItem(restart, set);
                 player.sendMessage("§aGave you checkpoint items!");
             }
+            else if(action == CommandAction.FLY) {
+                if(fly_perms.containsKey(player) && !fly_perms.get(player)) {
+                    player.sendMessage("§aTurned on flight!");
+                    fly_perms.remove(player);
+                    player.setAllowFlight(true);
+                }
+                else {
+                    player.sendMessage("§aTurned off flight!");
+                    fly_perms.put(player, false);
+                    player.setAllowFlight(false);
+
+                }
+            }
             else {
                 sendErrorMessageResponse(player, full_command.toString());
             }
@@ -92,6 +109,7 @@ public class CommandPark implements CommandExecutor, TabCompleter {
             if (args.length == 1) {
                 l.add("blocks");
                 l.add("checkpoints");
+                l.add("fly");
             }
 
         }
@@ -107,6 +125,9 @@ public class CommandPark implements CommandExecutor, TabCompleter {
 
                 case "checkpoints":
                     return CommandAction.CHECKPOINT;
+
+                case "fly":
+                    return CommandAction.FLY;
             }
 
         }
@@ -118,10 +139,21 @@ public class CommandPark implements CommandExecutor, TabCompleter {
         caller.sendMessage("§7" + cmd +"§c§o<--[HERE]");
     }
 
+    public void playerFly(PlayerToggleFlightEvent event) {
+        if(!fly_perms.get(event.getPlayer())) {
+            event.setCancelled(true);
+        }
+    }
+
     enum CommandAction {
         BLOCK,
         CHECKPOINT,
+        FLY,
         UNPARSEABLE,
         WRONG_PARSER
+    }
+
+    public CommandPark() {
+        fly_perms = new HashMap<>();
     }
 }

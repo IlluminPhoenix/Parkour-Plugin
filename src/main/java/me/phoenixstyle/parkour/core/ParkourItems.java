@@ -6,6 +6,7 @@ import me.phoenixstyle.parkour.utility.Utility;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -38,6 +39,7 @@ public class ParkourItems {
 
     private static void setNewCheckpoint(Player player) {
         saved_cps.put(player, player.getLocation());
+        player.playSound(player, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0F, 1.0F);
         player.sendMessage("§eNew checkpoint set!");
     }
 
