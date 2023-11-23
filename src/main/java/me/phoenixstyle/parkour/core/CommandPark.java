@@ -20,7 +20,8 @@ import java.util.*;
 
 public class CommandPark implements CommandExecutor, TabCompleter {
 
-    public HashMap<Player, Boolean> fly_perms;
+    //Player UUID
+    public HashMap<UUID, Boolean> fly_perms;
 
     // This method is called, when somebody uses our command
     @Override
@@ -81,14 +82,14 @@ public class CommandPark implements CommandExecutor, TabCompleter {
                 player.sendMessage("§aGave you checkpoint items!");
             }
             else if(action == CommandActionI1.FLY) {
-                if(fly_perms.containsKey(player) && !fly_perms.get(player)) {
+                if(fly_perms.containsKey(player.getUniqueId()) && !fly_perms.get(player.getUniqueId())) {
                     player.sendMessage("§aTurned on flight!");
-                    fly_perms.remove(player);
+                    fly_perms.remove(player.getUniqueId());
                     player.setAllowFlight(true);
                 }
                 else {
                     player.sendMessage("§aTurned off flight!");
-                    fly_perms.put(player, false);
+                    fly_perms.put(player.getUniqueId(), false);
                     player.setAllowFlight(false);
 
                 }
@@ -180,7 +181,8 @@ public class CommandPark implements CommandExecutor, TabCompleter {
     }
 
     public void playerFly(PlayerToggleFlightEvent event) {
-        if(!fly_perms.get(event.getPlayer())) {
+        UUID uuid = event.getPlayer().getUniqueId();
+        if(fly_perms.containsKey(uuid) && !fly_perms.get(uuid)) {
             event.setCancelled(true);
         }
     }

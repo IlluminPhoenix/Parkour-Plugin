@@ -15,9 +15,12 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.UUID;
 
 public class ParkourItems {
-    static HashMap<Player, Location> saved_cps;
+
+    //Player UUID
+    static HashMap<UUID, Location> saved_cps;
 
     public static void initiate() {
         saved_cps = new HashMap<>();
@@ -38,13 +41,13 @@ public class ParkourItems {
     }
 
     private static void setNewCheckpoint(Player player) {
-        saved_cps.put(player, player.getLocation());
+        saved_cps.put(player.getUniqueId(), player.getLocation());
         player.playSound(player, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0F, 1.0F);
         player.sendMessage("§eNew checkpoint set!");
     }
 
     private static void resetToCheckpoint(Player player) {
-        player.teleport(saved_cps.get(player));
+        player.teleport(saved_cps.get(player.getUniqueId()));
         //player.sendMessage("Reset");
     }
 }
