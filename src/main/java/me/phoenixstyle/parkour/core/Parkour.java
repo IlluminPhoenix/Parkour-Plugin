@@ -1,4 +1,5 @@
 package me.phoenixstyle.parkour.core;
+import me.phoenixstyle.parkour.core.plane.PlaneManager;
 import me.phoenixstyle.parkour.utility.Hologram;
 import me.phoenixstyle.parkour.utility.tick_time;
 import me.phoenixstyle.parkour.utility.Utility;
@@ -36,6 +37,7 @@ public final class Parkour extends JavaPlugin implements Listener {
     private BukkitScheduler scheduler;
     private static Parkour instance;
     private CommandPark commandPark;
+    public PlaneManager planeManager;
     public static Parkour getInstance() {
         return Parkour.instance;
     }
@@ -43,19 +45,25 @@ public final class Parkour extends JavaPlugin implements Listener {
 
     @Override
     public void onEnable() {
+        Parkour.instance = this;
+        scheduler = Bukkit.getScheduler();
         commandPark = new CommandPark();
+        planeManager = new PlaneManager();
+
+
+        Hologram.instantiate();
+        ParkourItems.initiate();
+
         Objects.requireNonNull(this.getCommand("park")).setExecutor(commandPark);
         Objects.requireNonNull(this.getCommand("park")).setTabCompleter(commandPark);
-        Parkour.instance = this;
+
         getServer().broadcastMessage("Reload");
         getServer().getPluginManager().registerEvents(this, this);
-        scheduler = Bukkit.getScheduler();
 
         pk_times = new HashMap<>();
         pressure_plate_check = new HashMap<>();
         parkour_blocks = new HashMap<>();
-        Hologram.instantiate();
-        ParkourItems.initiate();
+
 
         scheduler.runTaskTimer(instance, () -> {
 
@@ -300,7 +308,6 @@ public final class Parkour extends JavaPlugin implements Listener {
     public void sendDebugMessage(String s) {
         getServer().broadcastMessage(s);
     }
-
 
 }
 

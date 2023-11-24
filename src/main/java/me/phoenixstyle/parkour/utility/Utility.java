@@ -1,5 +1,6 @@
 package me.phoenixstyle.parkour.utility;
 
+import com.google.errorprone.annotations.FormatString;
 import me.phoenixstyle.parkour.core.Parkour;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
@@ -9,6 +10,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.Vector;
 import org.joml.Vector3d;
 
+import java.util.Formatter;
 import java.util.Objects;
 
 public class Utility {
@@ -91,5 +93,9 @@ public class Utility {
         }
 
         return new Vector(ds[0], ds[1], ds[2]);
+    }
+
+    public static String displayVector(Vector vec) {
+        return String.format("%.2f, %.2f, %.2f", vec.getX(), vec.getY(), vec.getZ());
     }
 }

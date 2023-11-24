@@ -109,7 +109,7 @@ public class CommandPark implements CommandExecutor, TabCompleter {
                 Location[] vecs = new Location[3];
 
                 for(int i = 0; i < 3; i++) {
-                    String[] arr = {args[i * 3 + 2], args[i * 3 + 2], args[i * 3 + 2]};
+                    String[] arr = {args[i * 3 + 2], args[i * 3 + 3], args[i * 3 + 4]};
                     try{
                         Vector vec = Utility.parseVector(arr);
                         vecs[i] = new Location(player.getWorld(), vec.getX(), vec.getY(), vec.getZ());
@@ -120,7 +120,8 @@ public class CommandPark implements CommandExecutor, TabCompleter {
                     }
                 }
 
-                new Plane(type, vecs[0], vecs[1], vecs[2]);
+                Plane plane = new Plane(type, vecs[0], vecs[1], vecs[2]);
+                Parkour.getInstance().planeManager.addPlane(plane);
             }
             else {
                 sendErrorMessageResponse(player, full_command.toString());
