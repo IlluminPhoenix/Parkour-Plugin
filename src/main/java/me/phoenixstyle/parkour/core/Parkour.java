@@ -1,5 +1,6 @@
 package me.phoenixstyle.parkour.core;
 import me.phoenixstyle.parkour.core.plane.PlaneManager;
+import me.phoenixstyle.parkour.core.plane.PlayerManager;
 import me.phoenixstyle.parkour.utility.Hologram;
 import me.phoenixstyle.parkour.utility.tick_time;
 import me.phoenixstyle.parkour.utility.Utility;
@@ -38,6 +39,7 @@ public final class Parkour extends JavaPlugin implements Listener {
     private static Parkour instance;
     private CommandPark commandPark;
     public PlaneManager planeManager;
+    public PlayerManager playerManager;
     public static Parkour getInstance() {
         return Parkour.instance;
     }
@@ -49,6 +51,7 @@ public final class Parkour extends JavaPlugin implements Listener {
         scheduler = Bukkit.getScheduler();
         commandPark = new CommandPark();
         planeManager = new PlaneManager();
+        playerManager = new PlayerManager();
 
 
         Hologram.instantiate();
