@@ -1,6 +1,7 @@
 package me.phoenixstyle.parkour.core.plane;
 
 import me.phoenixstyle.parkour.core.Parkour;
+import me.phoenixstyle.parkour.utility.Utility;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.World;
@@ -14,6 +15,8 @@ public class Plane {
     public Location posx;
     public Vector posy;
     public Vector posz;
+
+    public double CRadius;
     Parkour.ParkourBlockType type;
 
     public Plane(Parkour.ParkourBlockType type, Location x, Location y, Location z) {
@@ -46,6 +49,18 @@ public class Plane {
         }
     }
 
+    public void visualizePlaneRadius() {
+        Utility.renderSphere(getCentre(), getCRadius(), Particle.END_ROD, 50);
+    }
+
+    public Location getCentre() {
+        return posx.clone().add(posy.clone().multiply(0.5)).add(posz.clone().multiply(0.5));
+    }
+
+    public double getCRadius() {
+        return posy.clone().add(posz).multiply(0.5).length();
+    }
+
     public Location getPosx() {
         return posx;
     }
@@ -67,7 +82,7 @@ public class Plane {
             return Double.NaN;
         }
         Vector la = player.getPreviousLocation().toVector();
-        Vector lb = player.getPlayer().getLocation().toVector();
+        Vector lb = player.getCurrentLocation().toVector();
         Vector lab = la.clone().subtract(lb);
 
         ArrayList<Vector> vertices = new ArrayList<>();
@@ -93,9 +108,9 @@ public class Plane {
 
             if(t >= 0 && t <= 1 && u >= 0 && u <= 1 && v >= 0 && v <= 1) {
                 collisions.add(t);
-                player.getPlayer().sendMessage(String.format("§aT: %.4f", t));
-                player.getPlayer().sendMessage(String.format("§7U: %.4f", u));
-                player.getPlayer().sendMessage(String.format("§7V: %.4f", v));
+                //player.getPlayer().sendMessage(String.format("§aT: %.4f", t));
+                //player.getPlayer().sendMessage(String.format("§7U: %.4f", u));
+                //player.getPlayer().sendMessage(String.format("§7V: %.4f", v));
 
                 Vector collision = new Vector(0.0, 0.0, 0.0).add(ver).add(lab.clone().multiply(t));
 

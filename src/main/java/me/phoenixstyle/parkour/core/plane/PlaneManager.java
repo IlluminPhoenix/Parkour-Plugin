@@ -29,9 +29,10 @@ public class PlaneManager {
             for(ArrayList<Plane> arrayList : planes.values()) {
                 for(Plane plane : arrayList) {
                     plane.visualizePlane(3);
+                    //plane.visualizePlaneRadius();
                 }
             }
-        }, 0, 12);
+        }, 0, 20);
         /*
         scheduler.runTaskTimer(Parkour.getInstance(), () -> {
 

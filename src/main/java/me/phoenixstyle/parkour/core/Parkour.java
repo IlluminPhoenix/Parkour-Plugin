@@ -30,7 +30,7 @@ import java.util.*;
 
 
 public final class Parkour extends JavaPlugin implements Listener {
-    private HashMap<Player, Integer> pk_times;
+    private HashMap<Player, Double> pk_times;
     private HashMap<Player, Double> pressure_plate_check;
     private HashMap<Location, ParkourBlock> parkour_blocks;
 
@@ -214,10 +214,10 @@ public final class Parkour extends JavaPlugin implements Listener {
             if(type != ParkourBlockType.NONE) {
                 if(Math.abs(block.getX()) < 0.4375 && Math.abs(block.getZ()) < 0.4375 && point.getY() == pair.getValue()) {
                     if(type == ParkourBlockType.START) {
-                        parkourStart(player);
+                        parkourStart(player, 0, false);
                     }
                     else if(type == ParkourBlockType.END) {
-                        parkourFinish(player);
+                        parkourFinish(player, 0);
                     }
                     break;
                 }
@@ -226,15 +226,21 @@ public final class Parkour extends JavaPlugin implements Listener {
 
     }
 
-    private void parkourStart(Player player) {
+    public void parkourStart(Player player, double offset, boolean mute) {
         if(pk_times.containsKey(player)) {
-            player.sendMessage("§aReset your timer to 00:00! Get to the finish line!");
+            if(!mute) {
+                player.sendMessage("§aReset your timer to 00:00! Get to the finish line!");
+            }
+
         }
         else {
-            player.sendMessage("§aParkour challenge started!");
+            if(!mute) {
+                player.sendMessage("§aParkour challenge started!");
+            }
+
         }
 
-        pk_times.put(player, 0);
+        pk_times.put(player, offset);
     }
 
     public void failParkour(Player player, String reason) {
@@ -248,7 +254,7 @@ public final class Parkour extends JavaPlugin implements Listener {
         pk_times.remove(player);
     }
 
-    private void parkourFinish(Player player) {
+    public void parkourFinish(Player player, double offset) {
         if(pk_times.containsKey(player)) {
             getServer().broadcastMessage("§b" + player.getDisplayName() + "§a completed the parkour in §e§l"
                     + new tick_time(pk_times.get(player)).to_string() + "!");

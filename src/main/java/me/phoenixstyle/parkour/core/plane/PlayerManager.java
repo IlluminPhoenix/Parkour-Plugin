@@ -1,7 +1,9 @@
 package me.phoenixstyle.parkour.core.plane;
 
 import me.phoenixstyle.parkour.core.Parkour;
+import me.phoenixstyle.parkour.utility.Utility;
 import org.bukkit.Bukkit;
+import org.bukkit.Particle;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,6 +22,10 @@ public class PlayerManager {
         };
 
         Bukkit.getScheduler().runTaskTimer(Parkour.getInstance(), () -> {
+            for(Player player : players.values()) {
+                player.updateLocations();
+            }
+
             HashSet<org.bukkit.entity.Player> online = new HashSet<>(Parkour.getInstance().getServer().getOnlinePlayers());
             HashSet<UUID> online_uuids = new HashSet<>();
 
@@ -42,10 +48,16 @@ public class PlayerManager {
 
             checkAllCollisions();
 
-            for(Player player : players.values()) {
-                player.updatePreviousLocation();
-            }
+
         }, 0L, 1L);
+
+        Bukkit.getScheduler().runTaskTimer(Parkour.getInstance(), () -> {
+            for(Player player : players.values()) {
+                player.updateLocations();
+                //Utility.renderSphere(player.getTickCentre(),
+                //      player.getTickCRadius(), Particle.DRAGON_BREATH, 50);
+            }
+        }, 0L, 20L);
     }
 
     public void checkAllCollisions() {
@@ -57,13 +69,24 @@ public class PlayerManager {
                 continue;
             }
 
-
             for(Plane plane : planes.get(player.getPlayer().getWorld().getUID())) {
+
+                double distance = plane.getCentre().subtract(player.getTickCentre()).length();
+                if(distance > plane.getCRadius() + player.getTickCRadius()) {
+                    //player.getPlayer().sendMessage("§cOutside of range!");
+                    continue;
+                }
 
                 double t = plane.collide(player, Plane.CollisionType.VERTICES);
 
                 if(!Double.isNaN(t)) {
-                    player.getPlayer().sendMessage(String.format("-> §eT: %.4f --------\n", t));
+                    if(plane.type == Parkour.ParkourBlockType.START) {
+                        Parkour.getInstance().parkourStart(player.getPlayer(), 1 - t, false);
+                    }
+                    else if(plane.type == Parkour.ParkourBlockType.END) {
+                        Parkour.getInstance().parkourFinish(player.getPlayer(), 1 - t);
+                    }
+                    //player.getPlayer().sendMessage(String.format("-> §eT: %.4f --------\n", t));
                 }
             }
         }

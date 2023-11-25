@@ -1,5 +1,6 @@
 package me.phoenixstyle.parkour.core.plane;
 
+import me.phoenixstyle.parkour.core.Parkour;
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
 
@@ -11,10 +12,16 @@ public class Player {
     private org.bukkit.entity.Player player;
     private UUID player_uuid;
     private Location previousLocation;
+    private Location currentLocation;
+    private long locsAge;
 
     public Player(org.bukkit.entity.Player player) {
         this.player = player;
         this.player_uuid = player.getUniqueId();
+        currentLocation = player.getLocation();
+        locsAge = -1;
+        updateLocations();
+
     }
 
     public static Vector getCentre(Vector playerLocation /*, State */) {
@@ -45,8 +52,12 @@ public class Player {
 
     }
 
-    public void updatePreviousLocation() {
-        previousLocation = player.getLocation();
+    public void updateLocations() {
+        if(player.getWorld().getGameTime() != locsAge) {
+            previousLocation = currentLocation.clone();
+            currentLocation = player.getLocation();
+            locsAge = player.getWorld().getGameTime();
+        }
     }
 
     public Vector getCentre() {
@@ -78,6 +89,9 @@ public class Player {
 
     public Location getPreviousLocation() {
         return previousLocation;
+    }
+    public Location getCurrentLocation() {
+        return currentLocation;
     }
 
     public void remove() {
