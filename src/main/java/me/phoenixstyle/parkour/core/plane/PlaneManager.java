@@ -17,14 +17,12 @@ import java.util.UUID;
 
 public class PlaneManager {
     private HashMap<UUID, ArrayList<Plane>> planes;
-    private HashMap<Player, Location> previousLocation;
 
     BukkitScheduler scheduler;
 
     public PlaneManager() {
         this.scheduler = Bukkit.getScheduler();
         planes = new HashMap<>();
-        previousLocation = new HashMap<>();
         scheduler.runTaskTimer(Parkour.getInstance(), () -> {
             for(ArrayList<Plane> arrayList : planes.values()) {
                 for(Plane plane : arrayList) {
@@ -33,48 +31,6 @@ public class PlaneManager {
                 }
             }
         }, 0, 20);
-        /*
-        scheduler.runTaskTimer(Parkour.getInstance(), () -> {
-
-
-            for(ArrayList<Plane> arrayList : planes.values()) {
-                for(Plane plane : arrayList) {
-                    Player player = Objects.requireNonNull(plane.getPosx().getWorld()).getPlayers().get(0);
-                    if(!previousLocation.containsKey(player)) {
-                        continue;
-                    }
-                    Vector la =  previousLocation.get(player).toVector();
-                    Vector lb = player.getLocation().toVector();
-                    Vector lab =  lb.clone().subtract(la);
-
-
-                    //player.sendMessage("la: " + Utility.displayVector(la) + "\nlb: " + Utility.displayVector(lb) + "\nlab: " + Utility.displayVector(lab));
-                    //player.sendMessage("p0: " + Utility.displayVector(plane.posx.toVector()) + "\np01: " + Utility.displayVector(plane.posy.toVector()) + "\np02: " + Utility.displayVector(plane.posz.toVector()));
-
-                    double t = plane.linePlaneIntersectionT(la, lab);
-                    double u = plane.linePlaneIntersectionU(la, lab);
-                    double v = plane.linePlaneIntersectionV(la, lab);
-
-                    if(t >= 0 && t <= 1 && u >= 0 && u <= 1 && v >= 0 && v <= 1) {
-                        player.sendMessage(String.format("§aT: %.4f", t));
-                        player.sendMessage(String.format("§7U: %.4f", u));
-                        player.sendMessage(String.format("§7V: %.4f", v));
-                    }
-                }
-
-
-            }
-
-            //Major exploit when teleporting
-            for(Player player : Parkour.getInstance().getServer().getOnlinePlayers()) {
-                previousLocation.put(player, player.getLocation());
-            }
-            //Parkour.getInstance().sendDebugMessage("Players: " + Parkour.getInstance().getServer().getOnlinePlayers());
-
-
-
-        }, 0, 1);
-         */
     }
 
     public HashMap<UUID, ArrayList<Plane>> getPlanes() {

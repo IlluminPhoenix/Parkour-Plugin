@@ -81,10 +81,12 @@ public class PlayerManager {
 
                 if(!Double.isNaN(t)) {
                     if(plane.type == Parkour.ParkourBlockType.START) {
+                        //player.getPlayer().sendMessage("§a§lT: " + t);
                         Parkour.getInstance().parkourStart(player.getPlayer(), 1 - t, false);
                     }
                     else if(plane.type == Parkour.ParkourBlockType.END) {
-                        Parkour.getInstance().parkourFinish(player.getPlayer(), 1 - t);
+                        //player.getPlayer().sendMessage("§c§lT: " + t);
+                        Parkour.getInstance().parkourFinish(player.getPlayer(), t - 1);
                     }
                     //player.getPlayer().sendMessage(String.format("-> §eT: %.4f --------\n", t));
                 }

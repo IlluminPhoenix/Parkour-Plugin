@@ -17,8 +17,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
 import org.bukkit.event.world.EntitiesLoadEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
@@ -27,12 +25,15 @@ import org.bukkit.util.Vector;
 
 
 import java.util.*;
+import java.util.stream.Stream;
 
 
 public final class Parkour extends JavaPlugin implements Listener {
     private HashMap<Player, Double> pk_times;
     private HashMap<Player, Double> pressure_plate_check;
     private HashMap<Location, ParkourBlock> parkour_blocks;
+    private long tickTime;
+    private World mainWorld;
 
 
     private BukkitScheduler scheduler;
@@ -67,8 +68,15 @@ public final class Parkour extends JavaPlugin implements Listener {
         pressure_plate_check = new HashMap<>();
         parkour_blocks = new HashMap<>();
 
+        Optional<World> first = getServer().getWorlds().stream().findFirst();
+        first.ifPresent(world -> {
+            mainWorld = world;
+            tickTime = world.getGameTime();
+        });
 
         scheduler.runTaskTimer(instance, () -> {
+            updateTimes();
+            //sendDebugMessage("§3TICK: " + tickTime);
 
             for( HashMap.Entry<Player, Double> p : pressure_plate_check.entrySet()) {
                 pressurePlateCheck(p);
@@ -78,7 +86,6 @@ public final class Parkour extends JavaPlugin implements Listener {
                 //getServer().broadcastMessage("Y: " + x.getKey().getLocation().getY() + " - " + x.getValue() + " = " + (x.getKey().getLocation().getY() <= x.getValue()));
                 return x.getKey().getLocation().getY() <= x.getValue();
             });
-            parkourIterateTimes();
         }, 0L, 1L);
     }
 
@@ -227,6 +234,8 @@ public final class Parkour extends JavaPlugin implements Listener {
     }
 
     public void parkourStart(Player player, double offset, boolean mute) {
+        //sendDebugMessage("Offset Start: " + offset);
+        updateTimes();
         if(pk_times.containsKey(player)) {
             if(!mute) {
                 player.sendMessage("§aReset your timer to 00:00! Get to the finish line!");
@@ -255,7 +264,10 @@ public final class Parkour extends JavaPlugin implements Listener {
     }
 
     public void parkourFinish(Player player, double offset) {
+        //sendDebugMessage("Offset Finish: " + offset);
+        updateTimes();
         if(pk_times.containsKey(player)) {
+            pk_times.put(player, pk_times.get(player) + offset);
             getServer().broadcastMessage("§b" + player.getDisplayName() + "§a completed the parkour in §e§l"
                     + new tick_time(pk_times.get(player)).to_string() + "!");
             player.sendMessage("§aUnfortunately you did not break any of the records for this parkour!");
@@ -318,6 +330,28 @@ public final class Parkour extends JavaPlugin implements Listener {
         getServer().broadcastMessage(s);
     }
 
+    public void updateTimes() {
+        if(pk_times.isEmpty() && mainWorld == null) {
+            return;
+        }
+
+        if(mainWorld == null) {
+            mainWorld = pk_times.keySet().stream().findFirst().get().getWorld();
+            tickTime = mainWorld.getGameTime();
+        }
+
+        //sendDebugMessage("Update: " + tickTime + " - " + mainWorld.getGameTime());
+
+        if(mainWorld.getGameTime() != tickTime) {
+            //sendDebugMessage("Iterate");
+            parkourIterateTimes();
+            tickTime = mainWorld.getGameTime();
+        }
+        else {
+            //sendDebugMessage("Double");
+        }
+
+    }
 }
 
 
