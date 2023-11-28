@@ -83,7 +83,7 @@ public class Plane {
         }
         Vector la = player.getPreviousLocation().toVector();
         Vector lb = player.getCurrentLocation().toVector();
-        Vector lab = la.clone().subtract(lb);
+        Vector lab = lb.clone().subtract(la);
 
         ArrayList<Vector> vertices = new ArrayList<>();
         ArrayList<Line> edges = new ArrayList<>();
@@ -108,6 +108,7 @@ public class Plane {
 
             if(t >= 0 && t <= 1 && u >= 0 && u <= 1 && v >= 0 && v <= 1) {
                 collisions.add(t);
+                //player.getPlayer().sendMessage("La: " + Utility.displayVector(la) + "\nLb: " + Utility.displayVector(lb) + "\nLab: " + Utility.displayVector(lab));
                 //player.getPlayer().sendMessage(String.format("§aT: %.4f", t));
                 //player.getPlayer().sendMessage(String.format("§7U: %.4f", u));
                 //player.getPlayer().sendMessage(String.format("§7V: %.4f", v));
@@ -174,10 +175,10 @@ public class Plane {
     }
 
     enum CollisionType {
-        POINT,
-        VERTICES,
-        EDGES,
-        FULL,
+        POINT, // 1 Collision
+        VERTICES, // 8 Collisions
+        EDGES, // VERTICES + 48 = 56 Collisions
+        FULL, // EDGES + 24 = 80 Collisions
     }
 
     class Line {

@@ -33,14 +33,14 @@ public class PlayerManager {
                 online_uuids.add(player.getUniqueId());
 
                 if(!players.containsKey(player.getUniqueId())) {
-                    Parkour.getInstance().sendDebugMessage("§a" + player.getDisplayName() + " joined!");
+                    //Parkour.getInstance().sendDebugMessage("§a" + player.getDisplayName() + " joined!");
                     players.put(player.getUniqueId(), new Player(player));
                 }
             };
 
             for(UUID uuid : players.keySet()) {
                 if(!online_uuids.contains(uuid)) {
-                    Parkour.getInstance().sendDebugMessage("§a" + players.get(uuid).getPlayer().getDisplayName() + " left!");
+                    //Parkour.getInstance().sendDebugMessage("§a" + players.get(uuid).getPlayer().getDisplayName() + " left!");
 
                     players.remove(uuid).remove();
                 }

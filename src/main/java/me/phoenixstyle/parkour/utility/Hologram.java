@@ -75,4 +75,9 @@ public class Hologram {
         armour_stand.setMetadata("hologram", new FixedMetadataValue(Parkour.getInstance(), true));
         armour_stand.teleport(loc);
     }
+
+    public void changeName(String name) {
+        this.name = name;
+        armour_stand.setCustomName(name);
+    }
 }
