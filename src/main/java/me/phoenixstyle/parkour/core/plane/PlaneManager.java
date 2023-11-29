@@ -1,6 +1,7 @@
 package me.phoenixstyle.parkour.core.plane;
 
 import me.phoenixstyle.parkour.core.Parkour;
+import me.phoenixstyle.parkour.sqlite_database.Database;
 import me.phoenixstyle.parkour.utility.Utility;
 import me.phoenixstyle.parkour.utility.Utility.*;
 import org.bukkit.Bukkit;
@@ -10,10 +11,7 @@ import org.bukkit.entity.Vex;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.util.Vector;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 public class PlaneManager {
     private HashMap<UUID, ArrayList<Plane>> planes;
@@ -22,7 +20,7 @@ public class PlaneManager {
 
     public PlaneManager() {
         this.scheduler = Bukkit.getScheduler();
-        planes = new HashMap<>();
+        loadPlaneData(Parkour.getInstance().getDatabase());
         scheduler.runTaskTimer(Parkour.getInstance(), () -> {
             for(ArrayList<Plane> arrayList : planes.values()) {
                 for(Plane plane : arrayList) {
@@ -44,6 +42,17 @@ public class PlaneManager {
         else {
             planes.put(plane.getWorld().getUID(), new ArrayList<>());
             planes.get(plane.getWorld().getUID()).add(plane);
+        }
+    }
+
+    public void loadPlaneData(Database database) {
+        planes = new HashMap<>();
+        Optional<ArrayList<Plane>> optional = database.readPkPlanes();
+        if(optional.isPresent()) {
+            ArrayList<Plane> planeList = optional.get();
+            for(Plane plane : planeList) {
+                addPlane(plane);
+            }
         }
     }
 }

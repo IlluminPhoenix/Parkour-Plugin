@@ -121,6 +121,7 @@ public class CommandPark implements CommandExecutor, TabCompleter {
                 }
 
                 Plane plane = new Plane(type, vecs[0], vecs[1], vecs[2]);
+                plane.writeToDatabase();
                 Parkour.getInstance().planeManager.addPlane(plane);
             }
             else {

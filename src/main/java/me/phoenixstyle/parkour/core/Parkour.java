@@ -148,7 +148,7 @@ public final class Parkour extends JavaPlugin implements Listener {
             String name = "";
 
             ParkourBlock pkBlock = new ParkourBlock(block.getLocation(), type, event.getPlayer());
-            pkBlock.initiate();
+            pkBlock.writeToDatabase();
             parkour_blocks.put(block.getLocation(), pkBlock);
             //getServer().broadcastMessage("Type: " + type);
         }
@@ -338,7 +338,7 @@ public final class Parkour extends JavaPlugin implements Listener {
             this.type = type;
         }
 
-        public void initiate() {
+        public void writeToDatabase() {
             Parkour.getInstance().database.modifyPkBlocks(this, Database.Action.WRITE);
         }
 
@@ -431,6 +431,10 @@ public final class Parkour extends JavaPlugin implements Listener {
             //sendDebugMessage("Double");
         }
 
+    }
+
+    public Database getDatabase() {
+        return database;
     }
 }
 

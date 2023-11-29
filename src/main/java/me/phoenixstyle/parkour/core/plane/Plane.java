@@ -1,6 +1,7 @@
 package me.phoenixstyle.parkour.core.plane;
 
 import me.phoenixstyle.parkour.core.Parkour;
+import me.phoenixstyle.parkour.sqlite_database.Database;
 import me.phoenixstyle.parkour.utility.Utility;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -26,6 +27,11 @@ public class Plane {
         posz = z.subtract(x).toVector();
         //Parkour.getInstance().sendDebugMessage(x + " \n- " + y + " \n- " + z + "\n- " + type);
     }
+
+    public void writeToDatabase() {
+        Parkour.getInstance().getDatabase().modifyPkPlanes(this, Database.Action.WRITE);
+    }
+
 
     public void visualizePlane(int gridDensity) {
         ArrayList<Vector> points = new ArrayList<>();
@@ -75,6 +81,10 @@ public class Plane {
 
     public World getWorld() {
         return posx.getWorld();
+    }
+
+    public Parkour.ParkourBlockType getType() {
+        return type;
     }
 
     public double collide(Player player, CollisionType type) {
