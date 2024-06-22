@@ -39,11 +39,7 @@ public class Database {
         try (Connection conn = connect()) {
             if (conn != null) {
                 DatabaseMetaData meta = conn.getMetaData();
-                Parkour.getInstance().sendDebugMessage("The driver name is " + meta.getDriverName());
-                Parkour.getInstance().sendDebugMessage("A new database has been created.");
-                conn.close();
             }
-
         } catch (SQLException e) {
             Parkour.getInstance().sendDebugMessage(e.getMessage());
             return false;
@@ -65,10 +61,10 @@ public class Database {
     private void registerAllTables() {
         // SQL statement for creating a new table
         setupCommands.add("CREATE TABLE IF NOT EXISTS pk_blocks (x integer, y integer, z integer, w Text, type integer, PRIMARY KEY ( x,y,z,w ));");
-        setupCommands.add("CREATE TABLE IF NOT EXISTS pk_planes (" +
+        setupCommands.add("CREATE TABLE IF NOT EXISTS pk_planes (name Text PRIMARY KEY NOT NULL," +
                 "xx real, xy real, xz real, xw Text, " +
                 "yx real, yy real, yz real, " +
-                "zx real, zy real, zz real, type integer, PRIMARY KEY ( xx,xy,xz,xw,yx,yy,yz,zx,zy,zz,type ));");
+                "zx real, zy real, zz real, type integer);");
     }
 
     private void setup() {
@@ -86,7 +82,6 @@ public class Database {
              Statement stmt = conn.createStatement()) {
             // create a new table
             stmt.execute(statement);
-            conn.close();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
 
@@ -96,7 +91,6 @@ public class Database {
     }
 
     public void modifyPkBlocks(Parkour.ParkourBlock block, Action action) {
-
         if(action == Action.WRITE) {
             try (Connection conn = connect();
                  PreparedStatement pstmt = conn.prepareStatement("REPLACE INTO pk_blocks VALUES(?,?,?,?,?)");
@@ -124,7 +118,6 @@ public class Database {
                 pstmt.setString(4, Objects.requireNonNull(block.location.getWorld()).getUID().toString());
                 pstmt.executeUpdate();
                 //Parkour.getInstance().sendDebugMessage("Delete");
-                conn.close();
             }
             catch (SQLException e) {
                 System.out.println(e.getMessage());
@@ -162,7 +155,6 @@ public class Database {
 
 
             }
-            //conn.close();
         }
         catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -181,22 +173,23 @@ public class Database {
 
         if(action == Action.WRITE) {
             try (Connection conn = connect();
-                 PreparedStatement pstmt = conn.prepareStatement("REPLACE INTO pk_planes VALUES(?,?,?,?,?,?,?,?,?,?,?)");
+                 PreparedStatement pstmt = conn.prepareStatement("REPLACE INTO pk_planes VALUES(?,?,?,?,?,?,?,?,?,?,?,?)");
             ){
                 Location x = plane.getPosx();
                 Vector y = plane.getPosy();
                 Vector z = plane.getPosz();
-                pstmt.setDouble(1, x.getX());
-                pstmt.setDouble(2, x.getY());
-                pstmt.setDouble(3, x.getZ());
-                pstmt.setString(4, Objects.requireNonNull(x.getWorld()).getUID().toString());
-                pstmt.setDouble(5, y.getX());
-                pstmt.setDouble(6, y.getY());
-                pstmt.setDouble(7, y.getZ());
-                pstmt.setDouble(8, z.getX());
-                pstmt.setDouble(9, z.getY());
-                pstmt.setDouble(10, z.getZ());
-                pstmt.setDouble(11, plane.getType().toInt());
+                pstmt.setString(1, plane.name);
+                pstmt.setDouble(2, x.getX());
+                pstmt.setDouble(3, x.getY());
+                pstmt.setDouble(4, x.getZ());
+                pstmt.setString(5, Objects.requireNonNull(x.getWorld()).getUID().toString());
+                pstmt.setDouble(6, y.getX());
+                pstmt.setDouble(7, y.getY());
+                pstmt.setDouble(8, y.getZ());
+                pstmt.setDouble(9, z.getX());
+                pstmt.setDouble(10, z.getY());
+                pstmt.setDouble(11, z.getZ());
+                pstmt.setDouble(12, plane.getType().toInt());
                 pstmt.executeUpdate();
                 //Parkour.getInstance().sendDebugMessage("Write");
                 conn.close();
@@ -207,26 +200,10 @@ public class Database {
         }
         else {
             try (Connection conn = connect();
-                 PreparedStatement pstmt = conn.prepareStatement("DELETE FROM pk_blocks WHERE xx = ? AND xy = ? AND xz = ? AND xw = ? AND " +
-                         "yx = ? AND yy = ? AND yz = ? AND " +
-                         "zx = ? AND zy = ? AND zz = ? AND");
+                 PreparedStatement pstmt = conn.prepareStatement("DELETE FROM pk_planes WHERE name = ?");
             ){
-                Location x = plane.getPosx();
-                Vector y = plane.getPosy();
-                Vector z = plane.getPosz();
-                pstmt.setDouble(1, x.getX());
-                pstmt.setDouble(2, x.getY());
-                pstmt.setDouble(3, x.getZ());
-                pstmt.setString(4, Objects.requireNonNull(x.getWorld()).getUID().toString());
-                pstmt.setDouble(5, y.getX());
-                pstmt.setDouble(6, y.getY());
-                pstmt.setDouble(7, y.getZ());
-                pstmt.setDouble(8, z.getX());
-                pstmt.setDouble(9, z.getY());
-                pstmt.setDouble(10, z.getZ());
+                pstmt.setString(1, plane.name);
                 pstmt.executeUpdate();
-                //Parkour.getInstance().sendDebugMessage("Delete");
-                conn.close();
             }
             catch (SQLException e) {
                 System.out.println(e.getMessage());
@@ -247,23 +224,25 @@ public class Database {
 
                 //System.out.println("STMT Closed: " + stmt.isClosed());
                 //System.out.println("Closed: " + resultSet.isClosed());
-                World world = Parkour.getInstance().getServer().getWorld(UUID.fromString(resultSet.getString(4)));
+                World world = Parkour.getInstance().getServer().getWorld(UUID.fromString(resultSet.getString(5)));
 
                 if(world == null) {
                     System.out.println("World is null!");
                     continue;
                 }
 
-                double xx = resultSet.getDouble(1);
-                double xy = resultSet.getDouble(2);
-                double xz = resultSet.getDouble(3);
+                String name = resultSet.getString(1);
+
+                double xx = resultSet.getDouble(2);
+                double xy = resultSet.getDouble(3);
+                double xz = resultSet.getDouble(4);
                 Location loc = new Location(world, xx, xy, xz);
 
-                Vector y = new Vector(resultSet.getDouble(5), resultSet.getDouble(6), resultSet.getDouble(7));
-                Vector z = new Vector(resultSet.getDouble(8), resultSet.getDouble(9), resultSet.getDouble(10));
+                Vector y = new Vector(resultSet.getDouble(6), resultSet.getDouble(7), resultSet.getDouble(8));
+                Vector z = new Vector(resultSet.getDouble(9), resultSet.getDouble(10), resultSet.getDouble(11));
 
-                Parkour.ParkourBlockType type = Parkour.ParkourBlockType.fromInt(resultSet.getInt(11));
-                Plane plane = new Plane(type, loc, y.toLocation(world).add(loc), z.toLocation(world).add(loc) );
+                Parkour.ParkourBlockType type = Parkour.ParkourBlockType.fromInt(resultSet.getInt(12));
+                Plane plane = new Plane(type, loc, y.toLocation(world).add(loc), z.toLocation(world).add(loc),  name);
                 pkBlocks.add(plane);
 
 

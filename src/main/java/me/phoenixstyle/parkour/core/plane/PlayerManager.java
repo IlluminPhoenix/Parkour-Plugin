@@ -1,16 +1,12 @@
 package me.phoenixstyle.parkour.core.plane;
 
 import me.phoenixstyle.parkour.core.Parkour;
-import me.phoenixstyle.parkour.utility.Utility;
 import org.bukkit.Bukkit;
-import org.bukkit.Particle;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.UUID;
-import java.util.function.IntFunction;
-import java.util.stream.Collectors;
 
 public class PlayerManager {
     HashMap<UUID, Player> players;
@@ -62,14 +58,14 @@ public class PlayerManager {
 
     public void checkAllCollisions() {
         PlaneManager planeManager = Parkour.getInstance().planeManager;
-        HashMap<UUID, ArrayList<Plane>> planes = planeManager.getPlanes();
+        HashMap<UUID, HashMap<String, Plane>> planes = planeManager.getWorldPlaneMap();
 
         for(Player player : players.values()) {
             if(!planes.containsKey(player.getPlayer().getWorld().getUID())) {
                 continue;
             }
 
-            for(Plane plane : planes.get(player.getPlayer().getWorld().getUID())) {
+            for(Plane plane : planes.get(player.getPlayer().getWorld().getUID()).values()) {
 
                 double distance = plane.getCentre().subtract(player.getTickCentre()).length();
                 if(distance > plane.getCRadius() + player.getTickCRadius()) {

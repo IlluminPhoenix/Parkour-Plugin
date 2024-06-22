@@ -2,19 +2,14 @@ package me.phoenixstyle.parkour.core.plane;
 
 import me.phoenixstyle.parkour.core.Parkour;
 import me.phoenixstyle.parkour.sqlite_database.Database;
-import me.phoenixstyle.parkour.utility.Utility;
-import me.phoenixstyle.parkour.utility.Utility.*;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Vex;
 import org.bukkit.scheduler.BukkitScheduler;
-import org.bukkit.util.Vector;
 
 import java.util.*;
 
 public class PlaneManager {
-    private HashMap<UUID, ArrayList<Plane>> planes;
+    private HashMap<UUID, HashMap<String, Plane>> worldPlaneMap;
+    private HashMap<String, Plane> namePlaneMap;
 
     BukkitScheduler scheduler;
 
@@ -22,8 +17,8 @@ public class PlaneManager {
         this.scheduler = Bukkit.getScheduler();
         loadPlaneData(Parkour.getInstance().getDatabase());
         scheduler.runTaskTimer(Parkour.getInstance(), () -> {
-            for(ArrayList<Plane> arrayList : planes.values()) {
-                for(Plane plane : arrayList) {
+            for(HashMap<String, Plane> planesHashMap : worldPlaneMap.values()) {
+                for(Plane plane : planesHashMap.values()) {
                     plane.visualizePlane(3);
                     //plane.visualizePlaneRadius();
                 }
@@ -31,22 +26,39 @@ public class PlaneManager {
         }, 0, 20);
     }
 
-    public HashMap<UUID, ArrayList<Plane>> getPlanes() {
-        return planes;
+    public
+    HashMap<UUID, HashMap<String, Plane>> getWorldPlaneMap() {
+        return worldPlaneMap;
     }
 
     public void addPlane(Plane plane) {
-        if(planes.containsKey(plane.getWorld().getUID())) {
-            planes.get(plane.getWorld().getUID()).add(plane);
+        if(!namePlaneMap.containsKey(plane)) {
+            namePlaneMap.put(plane.name, plane);
+            if(worldPlaneMap.containsKey(plane.getWorld().getUID())) {
+                worldPlaneMap.get(plane.getWorld().getUID()).put(plane.name, plane);
+            }
+            else {
+                worldPlaneMap.put(plane.getWorld().getUID(), new HashMap<>());
+                worldPlaneMap.get(plane.getWorld().getUID()).put(plane.name, plane);
+            }
         }
-        else {
-            planes.put(plane.getWorld().getUID(), new ArrayList<>());
-            planes.get(plane.getWorld().getUID()).add(plane);
+    }
+
+    public void removePlane(String name) {
+        Plane plane = namePlaneMap.remove(name);
+        if(plane != null) {
+            plane.remove();
+            HashMap<String, Plane> worldMap = worldPlaneMap.get(plane.getWorld().getUID());
+            worldMap.remove(plane.name);
+            if(worldMap.isEmpty()) {
+                worldPlaneMap.remove(plane.getWorld().getUID());
+            }
         }
     }
 
     public void loadPlaneData(Database database) {
-        planes = new HashMap<>();
+        worldPlaneMap = new HashMap<>();
+        namePlaneMap = new HashMap<>();
         Optional<ArrayList<Plane>> optional = database.readPkPlanes();
         if(optional.isPresent()) {
             ArrayList<Plane> planeList = optional.get();
@@ -54,5 +66,9 @@ public class PlaneManager {
                 addPlane(plane);
             }
         }
+    }
+
+    public HashMap<String, Plane> getNamePlaneMap() {
+        return namePlaneMap;
     }
 }

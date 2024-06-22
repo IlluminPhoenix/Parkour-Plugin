@@ -95,34 +95,50 @@ public class CommandPark implements CommandExecutor, TabCompleter {
                 }
             }
             else if (action == CommandActionI1.PLANE) {
-                if(args.length < 11) {
+                if(args.length < 2) {
                     sendErrorMessageResponse(player, full_command.toString());
                     return true;
                 }
 
-                Parkour.ParkourBlockType type = Utility.parseParkourBlockType(args[1]);
-                if(type == Parkour.ParkourBlockType.NONE) {
-                    sendErrorMessageResponse(player, full_command.toString());
-                    return true;
-                }
+                String name = args[2];
+                //Parkour.getInstance().sendDebugMessage(name);
 
-                Location[] vecs = new Location[3];
-
-                for(int i = 0; i < 3; i++) {
-                    String[] arr = {args[i * 3 + 2], args[i * 3 + 3], args[i * 3 + 4]};
-                    try{
-                        Vector vec = Utility.parseVector(arr);
-                        vecs[i] = new Location(player.getWorld(), vec.getX(), vec.getY(), vec.getZ());
-                    }
-                    catch (Exception e) {
+                if(args[1].equalsIgnoreCase("add")) {
+                    if(args.length < 13) {
                         sendErrorMessageResponse(player, full_command.toString());
                         return true;
                     }
+                    Parkour.ParkourBlockType type = Utility.parseParkourBlockType(args[3]);
+                    if(type == Parkour.ParkourBlockType.NONE) {
+                        sendErrorMessageResponse(player, full_command.toString());
+                        return true;
+                    }
+
+                    Location[] vecs = new Location[3];
+
+                    for(int i = 0; i < 3; i++) {
+                        String[] arr = {args[i * 3 + 4], args[i * 3 + 5], args[i * 3 + 6]};
+                        try{
+                            Vector vec = Utility.parseVector(arr);
+                            vecs[i] = new Location(player.getWorld(), vec.getX(), vec.getY(), vec.getZ());
+                        }
+                        catch (Exception e) {
+                            sendErrorMessageResponse(player, full_command.toString());
+                            return true;
+                        }
+                    }
+
+                    Plane plane = new Plane(type, vecs[0], vecs[1], vecs[2], name);
+                    plane.writeToDatabase();
+                    Parkour.getInstance().planeManager.addPlane(plane);
+                }
+                else if (args[1].equalsIgnoreCase("remove")) {
+                    Parkour.getInstance().planeManager.removePlane(name);
+                }
+                else {
+                    sendErrorMessageResponse(player, full_command.toString());
                 }
 
-                Plane plane = new Plane(type, vecs[0], vecs[1], vecs[2]);
-                plane.writeToDatabase();
-                Parkour.getInstance().planeManager.addPlane(plane);
             }
             else {
                 sendErrorMessageResponse(player, full_command.toString());
@@ -145,7 +161,25 @@ public class CommandPark implements CommandExecutor, TabCompleter {
                 l.add("plane");
             }
             else if(args.length == 2) {
-                if(args[0].equals("plane")) {
+                if(args[0].equalsIgnoreCase("plane")) {
+                    l.add("add");
+                    l.add("remove");
+                }
+            }
+            else if(args.length == 3) {
+                if(args[0].equalsIgnoreCase("plane") && args[1].equals("remove")) {
+                    HashMap<String, Plane> planeHashMap = Parkour.getInstance().planeManager.getNamePlaneMap();
+                    int i = 0;
+                    for(String name : planeHashMap.keySet()) {
+                        if(i >= 100) {break;}
+                        l.add(name);
+
+                        i++;
+                    }
+                }
+            }
+            else if(args.length == 4) {
+                if(args[0].equalsIgnoreCase("plane") && args[1].equals("add")) {
                     l.add("start");
                     l.add("end");
                 }

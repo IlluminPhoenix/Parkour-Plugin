@@ -13,6 +13,8 @@ import java.util.Objects;
 import java.util.TreeSet;
 
 public class Plane {
+
+    public String name;
     public Location posx;
     public Vector posy;
     public Vector posz;
@@ -20,7 +22,8 @@ public class Plane {
     public double CRadius;
     Parkour.ParkourBlockType type;
 
-    public Plane(Parkour.ParkourBlockType type, Location x, Location y, Location z) {
+    public Plane(Parkour.ParkourBlockType type, Location x, Location y, Location z, String name) {
+        this.name = name;
         this.type = type;
         posx = x;
         posy = y.subtract(x).toVector();
@@ -200,6 +203,10 @@ public class Plane {
             this.lab = lab;
         }
 
+    }
+
+    public void remove() {
+        Parkour.getInstance().getDatabase().modifyPkPlanes(this, Database.Action.REMOVE);
     }
 
     //Issue: Doesn't take into consideration if your sneaking or crawling/elytra-flying.
